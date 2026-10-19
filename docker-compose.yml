@@ -1,0 +1,14 @@
+services:
+  dashboard:
+    build: .
+    image: breast-cancer-ml:latest
+    ports:
+      - "${PORT:-8501}:8501"
+    environment:
+      - BCM_RANDOM_STATE=42
+      - PORT=8501
+    volumes:
+      # Persistência opcional de métricas/modelos gerados em runtime
+      - ./models:/app/models
+      - ./reports:/app/reports
+    restart: unless-stopped

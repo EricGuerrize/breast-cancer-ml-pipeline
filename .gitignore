@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Data
+data/raw/*
+!data/raw/.gitkeep
+*.csv
+!data/processed/.gitkeep
+
+# Models (large artifacts — regenerate via `make train`)
+models/*.pkl
+models/*.joblib
+!models/.gitkeep
+!models/README.md
+
+# MLflow / experiment tracking
+mlruns/
+mlartifacts/
+.mlflow/
+
+# Reports generated locally (CI regenerates)
+reports/figures/*.png
+reports/metrics/*.json
+!reports/figures/.gitkeep
+!reports/metrics/.gitkeep
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Docker
+*.log
+
+# Kaggle
+kaggle.json
