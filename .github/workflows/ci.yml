@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "cursor/**"]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-test-train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install package
+        run: |
+          python -m pip install -U pip
+          pip install -e ".[dev]"
+
+      - name: Ruff
+        run: |
+          ruff check src tests dashboard
+          ruff format --check src tests dashboard
+
+      - name: Pytest
+        run: pytest
+
+      - name: Train (offline sklearn)
+        run: bcm train --source sklearn --check-floors
+
+      - name: Demo smoke
+        run: bcm demo --source sklearn
+
+      - name: Upload metrics artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrics
+          path: reports/metrics/metrics.json
+          if-no-files-found: warn
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: lint-test-train
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: breast-cancer-ml:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
